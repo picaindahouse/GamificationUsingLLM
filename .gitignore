@@ -1,0 +1,4 @@
+**/*.env
+game/graphics/NinjaAdventure/
+game/ModelDeploymentImages/
+game/__pycache__/
