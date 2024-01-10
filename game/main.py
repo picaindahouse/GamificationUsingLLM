@@ -12,9 +12,9 @@ class Game:
         self.clock = pygame.time.Clock()
         
         # Set to 'play' while creating control panel
-        self.state = 'intro'
-        self.intro = Intro()
-        self.level = Level()
+        self.state = 'play'
+        self.intro = None #Intro()
+        self.level = Level() #None  Initialise after intro finishes
 
         # sound
         self.main_sound = pygame.mixer.Sound('audio/main.ogg')
@@ -24,7 +24,6 @@ class Game:
 
         # tome
         self.tome_open = False
-
 
     def run(self):
         while True:
@@ -45,7 +44,7 @@ class Game:
                             self.level.toggle_controls()
                         
                         elif event.key == pygame.K_k:
-                            if self.level.tome and self.level.tome.discuss_text == "Leave":
+                            if self.level.tome and self.level.tome.discuss_text == "Leave" or self.level.tome.test_text == "Leave":
                                 pass
                             else:
                                 self.tome_open = not self.tome_open
@@ -56,14 +55,18 @@ class Game:
                                 self.level.toggle_tome()
 
 
-                if self.level.open_tome:
-                    self.level.tome.mouse(event)
+                    if self.level.open_tome:
+                        self.level.tome.mouse(event)
+                    
+                    elif self.level.summarise:
+                        self.level.summary.mouse(event)
                 
             self.screen.fill(WATER_COLOR)
             if self.state == 'intro':
                 self.intro.run()
                 if self.intro.state == 'play':
                     self.state = 'play'
+                    self.level = Level()
             else:
                 self.level.run()
 

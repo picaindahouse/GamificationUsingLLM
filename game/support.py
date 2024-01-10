@@ -52,3 +52,9 @@ def background(surface, alpha):
 	tran_y = (surface.get_size()[1] - tran_height) //2
 	
 	surface.blit(semi_transparent_rect, (tran_x, tran_y))
+
+def update(story):
+	story = story.replace("[persona]", user_info['teacher_persona'])
+	story = story.replace("[teacher_name]", user_info['teacher_name'])
+	story = story.replace("[player_name]", user_info['name'])
+	return story

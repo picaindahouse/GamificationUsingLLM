@@ -83,7 +83,6 @@ class Player(Entity):
             else:
                 self.direction.y = 0
 
-
             if keys[pygame.K_RIGHT]:
                 self.direction.x = 1
                 self.status = 'right'

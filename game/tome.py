@@ -14,10 +14,6 @@ class Tome(Chatbot):
         self.found_pages = []
         self.searching_page = 0
 
-       ## Only while creating Tome ########
-        self.found_pages = self.lost_pages#
-       ####################################
-
         # Fade
         self.alpha = 0
 
@@ -30,6 +26,13 @@ class Tome(Chatbot):
         self.discuss_selected = False
         self.discuss_text = 'Discuss'
 
+        # Test Buttons & Chat Params
+        self.test = None
+        self.test_selected = False
+        self.test_text = 'Test'
+        self.test_chat_history = []
+        self.test_qns_answered = 0
+
         # QnA
         self.qns_answered = 0
         self.max_width = self.display_surface.get_width() * 0.8 - 200
@@ -37,10 +40,15 @@ class Tome(Chatbot):
     def reset(self, alpha = 0):
         self.alpha = alpha
         self.chat_history = []
+        self.test_chat_history = []
         self.user_input = ''
         self.write_reply = False
         self.ready_for_qn = True
         self.qns_answered = 0
+        self.test_qns_answered = 0
+
+    def found_page(self):
+        self.found_pages.append(self.lost_pages.pop(0))
 
     def button(self, text, x, y, selected):
         rect = pygame.Rect(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
@@ -74,6 +82,11 @@ class Tome(Chatbot):
         else:
             self.discuss_selected = False
 
+        if self.test.collidepoint(mouse_pos):
+            self.test_selected = True
+        else:
+            self.test_selected = False
+
     def fade(self):
         # Apply the fading effect
         if self.alpha < 255:
@@ -102,11 +115,33 @@ class Tome(Chatbot):
                 if self.discuss_text == "Discuss":
                     self.discuss_text = "Leave"
                     self.write_reply = True
+
+                    self.test_text = "Test"
                 else:
                     self.discuss_text = "Discuss"
                     self.write_reply = False
+
+            elif self.test_selected:
+                if self.test_text == "Test":
+                    self.test_text = "Leave"
+                    self.write_reply = True
+                    
+                    self.discuss_text = "Discuss"
+                    
+                else:
+                    self.test_text = "Test"
+                    self.write_reply = False
         else:
-            self.reply(event)
+            if self.test_text == "Leave":
+                self.reply(event, self.test_chat_history)
+            elif self.discuss_text == "Leave":
+                self.reply(event)
+
+    def display_message(self, message):
+        message_surf = self.font.render(message, True, TEXT_COLOR)
+        message_rect = message_surf.get_rect(center=(self.display_surface.get_width() // 2,
+                                                    self.display_surface.get_height() // 2))
+        self.display_surface.blit(message_surf, message_rect)
 
     def open(self):  
         if self.alpha == 255:      
@@ -117,16 +152,30 @@ class Tome(Chatbot):
                 self.display_surface.blit(image_to_show, image_rect)
 
                 self.discuss = self.button(self.discuss_text,
-                                           (WIDTH - BUTTON_WIDTH) // 2,
+                                           (WIDTH - BUTTON_WIDTH) // 2 - BUTTON_WIDTH // 2 - 1,
                                            HEIGHT - BUTTON_HEIGHT,
                                            self.discuss_selected)
+                
+                self.test = self.button(self.test_text,
+                                           (WIDTH - BUTTON_WIDTH) // 2 + BUTTON_WIDTH // 2 + 1,
+                                           HEIGHT - BUTTON_HEIGHT,
+                                           self.test_selected)
 
                 if self.discuss_text == "Leave":
                     background(self.display_surface, 200)
                     self.input_box("Please type your question here...")
                     if self.qns_answered < len(self.chat_history):
                         self.draw_dialog(self.chat_history[-1], self.user_thumbnail, 200, 100, self.max_width)
-                   
+                
+                elif self.test_text == "Leave":
+                    background(self.display_surface, 200)
+                    if len(self.found_pages) == self.searching_page + 1: 
+                        self.input_box("Please type your answer here...")
+                        if self.test_qns_answered < len(self.test_chat_history):
+                            self.draw_dialog(self.test_chat_history[-1], self.user_thumbnail, 200, 100, self.max_width)
+                    else:
+                        self.display_message("Go to last slide to take test!")
+
                 else:
                     self.next = self.button("Next", 
                                             WIDTH - BUTTON_WIDTH, 
@@ -143,10 +192,7 @@ class Tome(Chatbot):
                 message = "Find Pages of Tome of Knowledge to View"
                 self.display_surface.fill((0, 0, 0))
                 background(self.display_surface, 200)
-                message_surf = self.font.render(message, True, TEXT_COLOR)
-                message_rect = message_surf.get_rect(center=(self.display_surface.get_width() // 2,
-                                                             self.display_surface.get_height() // 2))
-                self.display_surface.blit(message_surf, message_rect)
+                self.display_message(message)
 
         else:
             overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)

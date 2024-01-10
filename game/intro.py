@@ -1,7 +1,9 @@
 import pygame
 from settings import *
 from creation import Creation
+from story import Story
 from llm import LLM
+from support import update
 
 
 class Intro:
@@ -31,8 +33,9 @@ class Intro:
         self.selection_time = None
         self.saves = list(saved_files.values())
 
-        # Creation
+        # Create Chatbots
         self.creation = Creation()
+        self.story = Story()
 
         # Questions
         self.questions_asked = 0
@@ -100,18 +103,36 @@ class Intro:
                     self.question = self.openai.ask_chatgpt(self.creation.chat_history[-1], MAX_TOKENS)
                     
                     if self.question[-9:].upper().replace(' ', '') == 'HAVEFUN!':
+                        self.openai.change_system(evaluation_system)
                         findings = self.openai.ask_chatgpt('Summarise your findings in a list as specified, do not add anything else. Do not need create new lines.', MAX_TOKENS)
                         for i, finding in enumerate(findings.split(', ')):
                             user_info[list(user_info.keys())[i]] = finding
                         print(user_info)
-                        self.state = 'play'
+
+                        # Move on to introducing the storyline
+                        story = update(story_system)
+                        self.openai = LLM(story)
+                        self.question = self.openai.ask_chatgpt('Introduce the game to the player', 160)
+                        self.questions_asked = 0
+                        self.state = 'story'
 
             if self.state == 'creation':
                 self.creation.ask_question(self.question, tran_width - 100, self.questions_asked)
 
+        elif self.state == 'story':
+            self.story.ask_question(self.question, self.questions_asked)
+            if self.story.ready_for_qn:
+                if len(self.story.chat_history) > self.questions_asked:
+                    self.questions_asked += 1
+                    self.question = self.openai.ask_chatgpt(self.story.chat_history[-1], 160)
+                    if self.question[-9:].upper().replace(' ', '') == 'HAVEFUN!':
+                        self.state = 'play'
+        
     def input(self, event):
         if self.state == 'creation':
             self.creation.reply(event)
+        elif self.state == 'story':
+            self.story.reply(event)
         else:
             if event.type == pygame.KEYDOWN:
                 if self.can_move:
@@ -218,7 +239,6 @@ class Save:
             return 'Empty Save'
         else:
             return 'creation'
-            #return 'play'
 
     def display(self,surface, selection_num, name):
             current_time = pygame.time.get_ticks()

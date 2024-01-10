@@ -12,6 +12,9 @@ class LLM:
         self.system = system
         self.history = []
 
+    def change_system(self, new_system):
+        self.system = new_system
+
     def ask_chatgpt(self, new_question, max_tokens):
         ### Loading OpenAI ###
 

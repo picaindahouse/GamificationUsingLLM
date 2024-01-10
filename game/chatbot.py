@@ -48,14 +48,16 @@ class Chatbot:
         pygame.draw.rect(self.display_surface, (0,0,0), thumbnail_rect)
         self.display_surface.blit(thumbnail, thumbnail_rect)
 
-    def reply(self, event):
+    def reply(self, event, chat = "base"):
+        if chat == "base":
+            chat = self.chat_history
         if self.write_reply:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     self.user_input = self.user_input[:-1]
                 elif event.key == pygame.K_RETURN:
                     if len(self.user_input) > 0:
-                        self.chat_history.append(self.user_input)
+                        chat.append(self.user_input)
                         self.write_reply = False
                         self.user_input = ''
                 else:
@@ -67,6 +69,7 @@ class Chatbot:
             input = placeholder
         else:
             input = "You: " + self.user_input
+            
         rendered_lines = text_wrap(input, self.font, 780 - 80)
         input_height = sum([surface.get_height() for surface in rendered_lines]) + 10  # Extra padding
         input_rect = pygame.Rect(250, self.display_surface.get_size()[1] * 0.85 - (input_height + 10), 780, input_height)
