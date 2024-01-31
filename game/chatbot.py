@@ -22,11 +22,11 @@ class Chatbot:
 
     def draw_dialog(self, message, thumbnail, x, y, max_width, first = True):
         # Render the message text
-        rendered_lines = text_wrap(message, self.font, max_width - 50)
+        rendered_lines = text_wrap(message, self.font, max_width - 100)
 
         # Calculate the size of the dialog box needed for the message
         message_height = max(100, sum([surface.get_height() for surface in rendered_lines]) + 20)  # Extra padding
-        width = max_width - 42
+        width = max_width - 100
         message_rect = pygame.Rect(x + 100, y, width, message_height)
 
         # Save message_height for next box
@@ -72,7 +72,7 @@ class Chatbot:
             
         rendered_lines = text_wrap(input, self.font, 780 - 80)
         input_height = sum([surface.get_height() for surface in rendered_lines]) + 10  # Extra padding
-        input_rect = pygame.Rect(250, self.display_surface.get_size()[1] * 0.85 - (input_height + 10), 780, input_height)
+        input_rect = pygame.Rect(250, self.display_surface.get_size()[1] * 0.85 - (input_height + 10), self.display_surface.get_size()[0] - 500, input_height)
 
         # Draw input box
         pygame.draw.rect(self.display_surface, '#6495ED', input_rect)

@@ -65,6 +65,10 @@ class Player(Entity):
         for animation in self.animations.keys():
             full_path = character_path + animation
             self.animations[animation] = import_folder(full_path)
+    
+    def next_day(self):
+        for stats in self.max_stats.keys():
+            self.max_stats[stats] = int(self.max_stats[stats] * 1.1)
 
     def input(self):
         keys = pygame.key.get_pressed()

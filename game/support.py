@@ -37,9 +37,10 @@ def text_wrap(text, font, max_width):
 	lines.append(font.render(current_line, True, TEXT_COLOR))
 	return lines
 
-def background(surface, alpha):
-	tran_height = surface.get_size()[1] * 0.8
-	tran_width = surface.get_size()[0] * 0.8
+def background(surface, alpha, ratio = 0.8):
+	tran_height = surface.get_size()[1] * ratio
+	tran_width = surface.get_size()[0] * ratio
+	
 	semi_transparent_rect = pygame.Surface((tran_width, 
 											tran_height),
 											pygame.SRCALPHA)

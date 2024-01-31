@@ -12,9 +12,9 @@ class Game:
         self.clock = pygame.time.Clock()
         
         # Set to 'play' while creating control panel
-        self.state = 'play'
-        self.intro = None #Intro()
-        self.level = Level() #None  Initialise after intro finishes
+        self.state = 'intro'
+        self.intro = Intro()
+        self.level = None  #Initialise after intro finishes
 
         # sound
         self.main_sound = pygame.mixer.Sound('audio/main.ogg')

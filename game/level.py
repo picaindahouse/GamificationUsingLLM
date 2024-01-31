@@ -127,20 +127,31 @@ class Level:
             'pages' : import_folder('graphics/scroll')
         }
 
+        # Kill old sprites:
+        for sprite in self.attackable_sprites:
+            if sprite.sprite_type == 'enemy':
+                sprite.kill()
+
         # Testing out scroll
         layout = import_csv_layout('map/map_Entities_scroll.csv')
+        have_page = False
         for row_index, row in enumerate(layout):
             for col_index, col in enumerate(row):
                 if col not in ['-1', '-5']:
                     x = col_index * TILESIZE
                     y = row_index * TILESIZE
 
-                
-                    
-                    if col == '400':
+                    if col == '394':
+                        self.player.rect.center = (x, y)
+                        self.player.hitbox.center = (x, y)
+                        if len(self.tome.found_pages) > 2:
+                            self.player.next_day()
+
+                    elif col == '400' and not have_page:
                         group = [self.visible_sprites, self.obstacles_sprites, self.attackable_sprites]
                         surface = choice(graphics['pages'])
                         Tile((x, y), group, 'page', surface)
+                        have_page = True
 
                     else:
                         if col == '390': 
@@ -159,7 +170,8 @@ class Level:
                                 self.obstacles_sprites,
                                 self.damage_player,
                                 self.trigger_death_particles,
-                                self.add_xp)
+                                self.add_xp,
+                                len(self.tome.found_pages))
 
     def create_attack(self):
         self.current_attack = Weapon(self.player, [self.visible_sprites, self.attack_sprites])
@@ -247,7 +259,6 @@ class Level:
                 self.tome.reset()
             self.open_tome = not self.open_tome
         
-
     def run(self):
         # Update and Draw the Game
         self.visible_sprites.custom_draw(self.player)
@@ -264,6 +275,10 @@ class Level:
 
         elif self.open_tome:
             self.tome.open()
+            if self.tome.next_day == True:
+                self.create_new_day()
+                self.tome.reset()
+                self.open_tome = False
         
         elif self.summarise:
             self.summary.summarise(self.tome.found_pages)

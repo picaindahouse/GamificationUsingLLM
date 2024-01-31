@@ -4,7 +4,7 @@ from entity import Entity
 from support import import_folder
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacles_sprites, damage_player, trigger_death_particles, add_xp):
+    def __init__(self, monster_name, pos, groups, obstacles_sprites, damage_player, trigger_death_particles, add_xp, num_pages):
 
         # General Setup
         super().__init__(groups)
@@ -22,13 +22,14 @@ class Enemy(Entity):
         self.obstacles_sprites = obstacles_sprites
 
         # stats
+        self.multiplier = (num_pages - 2) * 0.1 + 1
         self.monster_name = monster_name
         monster_info = monster_data[self.monster_name]
-        self.health = monster_info['health']
-        self.exp = monster_info['exp']
-        self.speed = monster_info['speed']
-        self.attack_damage = monster_info['damage']
-        self.resistance = monster_info['resistance']
+        self.health = int(monster_info['health'] * self.multiplier)
+        self.exp = int(monster_info['exp'] * self.multiplier)
+        self.speed = int(monster_info['speed'] * self.multiplier)
+        self.attack_damage = int(monster_info['damage'] * self.multiplier)
+        self.resistance = int(monster_info['resistance'] * self.multiplier)
         self.attack_radius = monster_info['attack_radius']
         self.notice_radius = monster_info['notice_radius']
         self.attack_type = monster_info['attack_type']

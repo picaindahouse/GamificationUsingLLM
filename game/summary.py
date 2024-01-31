@@ -2,6 +2,7 @@ import pygame
 from settings import *
 from chatbot import Chatbot
 from support import background
+from llm import LLM
 
 class Summary(Chatbot):
     def __init__(self):
@@ -9,16 +10,20 @@ class Summary(Chatbot):
         # General Setup
         super().__init__()
 
-        self.max_width = self.display_surface.get_width() * 0.8 - 200
+        self.max_width = self.display_surface.get_width() * 0.95 - 200
         self.alpha = 0
         self.sum = None
         self.sum_selected = False
         self.sum_text = 'Leave'
+        self.ans = ''
+        self.create_ans = False
 
     def reset(self):
         self.alpha = 0
         self.sum_selected = False
         self.sum_text = 'Leave'
+        self.create_ans = False
+        self.ans = ''
 
     def fade(self):
         # Apply the fading effect
@@ -60,6 +65,18 @@ class Summary(Chatbot):
         else:
             self.sum_selected = False
 
+    def ai_summary(self, content):
+        question = "The user has come across a slide. Please provide the user with a summary of the content that is on said page." + \
+                 " This is the content on said page: " + content + " Remember to subtly bring up your personality trait during your reply."
+        
+        system = "You are a game character speaking to the player. " + \
+                 "Here are the details you should know: " + \
+                 "Your name is " + user_info['teacher_name'] + \
+                 ". You are to channel your inner " + user_info['teacher_persona'] + ". Keep it subtle and let this personality trait flow seamlessly into your response. " + \
+                 "Players name is " + user_info['name'] + ". "
+        
+        return LLM(system).ask_chatgpt(question, 300)
+
     def summarise(self, found_pages):
         if self.alpha == 255:
             # Show newly found image
@@ -68,18 +85,21 @@ class Summary(Chatbot):
             image_rect = image_to_show.get_rect(midtop=self.display_surface.get_rect().midtop)
             self.display_surface.blit(image_to_show, image_rect)
 
-            # Create Button
-            self.sum = self.button(self.sum_text,
-                                           (WIDTH - BUTTON_WIDTH) // 2,
-                                           HEIGHT - BUTTON_HEIGHT,
-                                           self.sum_selected)
-
             if self.sum_text == "Leave":
                 # Show summary
-                background(self.display_surface, 200)
+                background(self.display_surface, 200, 0.95)
                 page_number = len(found_pages)
-                summary = "Placeholder for summary here" # Once finish summarising all 56 pages, use chatgpt to summarise and place here 
-                self.draw_dialog(summary, self.teacher_thumbnail, 200, 100, self.max_width)
+                if self.create_ans == False:
+                    self.create_ans = True
+                    self.ans = self.ai_summary(slides_summary[str(page_number) + '.jpg'])
+                summary = self.ans
+                self.draw_dialog(summary, self.teacher_thumbnail, 82, 35, self.max_width)
+
+            # Create Button
+            self.sum = self.button(self.sum_text,
+                                   (WIDTH - BUTTON_WIDTH) // 2,
+                                   HEIGHT - BUTTON_HEIGHT,
+                                   self.sum_selected)
 
             self.hover()
 
