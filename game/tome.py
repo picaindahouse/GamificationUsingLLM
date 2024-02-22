@@ -80,7 +80,7 @@ class Tome(Chatbot):
 
     def create_test_system(self):
         summary = slides_summary[str(self.searching_page+1) + '.jpg'].lower()
-        system = "You are a testing " + user_info['name'] + ". on the following topic: [" + summary + \
+        system = "You are testing " + user_info['name'] + ". on the following topic: [" + summary + \
                  "] You will do this by continuously asking the player questions. " + \
                  "If the answer is correct inform the player how many questions they have gotten right, then proceed to the next question. If the answer is wrong, explain the mistake to the player. " + \
                  "Once the player answers 3 questions correctly just reply with 'pass123' and end the test. " + \
